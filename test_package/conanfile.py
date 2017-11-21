@@ -8,9 +8,12 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions['WITH_LZMA']  = self.options['Boost.Iostreams'].use_lzma;
+        cmake.definitions['WITH_ZLIB']  = self.options['Boost.Iostreams'].use_zlib;
+        cmake.definitions['WITH_BZIP2'] = self.options['Boost.Iostreams'].use_bzip2;
         cmake.configure()
         cmake.build()
-        
+
     def test(self):
         with tools.environment_append(RunEnvironment(self).vars):
             if self.settings.os == "Windows":

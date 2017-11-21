@@ -5,15 +5,15 @@ import os
 class BoostIostreamsConan(ConanFile):
     name = "Boost.Iostreams"
     version = "1.65.1"
-    generators = "boost" 
+    generators = "boost"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
     url = "https://github.com/bincrafters/conan-boost-iostreams"
     description = "Please visit http://www.boost.org/doc/libs/1_65_1/libs/libraries.htm"
     license = "www.boost.org/users/license.html"
     lib_short_names = ["iostreams"]
-    options = {"shared": [True, False], 'use_zlib': [True, False], 'use_bzip2': [True, False]}
-    default_options = "shared=False", "use_zlib=True", "use_bzip2=True"
+    options = {"shared": [True, False], 'use_zlib': [True, False], 'use_bzip2': [True, False], 'use_lzma': [True, False]}
+    default_options = "shared=False", "use_zlib=True", "use_bzip2=True", "use_lzma=True"
     build_requires = "Boost.Generator/1.65.1@bincrafters/testing"
     requires =  "Boost.Assert/1.65.1@bincrafters/testing", \
                       "Boost.Bind/1.65.1@bincrafters/testing", \
@@ -34,19 +34,23 @@ class BoostIostreamsConan(ConanFile):
                       "Boost.Utility/1.65.1@bincrafters/testing"
 
                       #assert1 bind3 config0 core2 detail5 function5 integer3 mpl5 preprocessor0 random9 range7 regex6 smart_ptr4 static_assert1 throw_exception2 type_traits3 utility5
-                      
+
     def requirements(self):
         if not self.options.shared:
             if self.options.use_bzip2:
                 self.requires("bzip2/1.0.6@conan/stable")
             if self.options.use_zlib:
                 self.requires("zlib/1.2.11@conan/stable")
+            if self.options.use_lzma:
+                self.requires("lzma/5.2.3@bincrafters/stable")
 
     def configure(self):
         if self.options.use_bzip2:
             self.options["bzip"].shared = False
         if self.options.use_zlib:
             self.options["zlib"].shared = False
+        if self.options.use_lzma:
+            self.options["lzma"].shared = False
 
     def source(self):
         boostorg_github = "https://github.com/boostorg"
@@ -58,11 +62,11 @@ class BoostIostreamsConan(ConanFile):
 
     def build(self):
         self.run(self.deps_user_info['Boost.Generator'].b2_command)
-        
+
     def package(self):
         for lib_short_name in self.lib_short_names:
             include_dir = os.path.join(lib_short_name, "include")
-            self.copy(pattern="*", dst="include", src=include_dir)		
+            self.copy(pattern="*", dst="include", src=include_dir)
 
         self.copy(pattern="*", dst="lib", src="stage/lib")
 
